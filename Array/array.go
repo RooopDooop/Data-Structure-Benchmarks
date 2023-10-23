@@ -1,4 +1,4 @@
-package main
+package benchmarkArray
 
 import (
 	"errors"
@@ -7,13 +7,9 @@ import (
 	"time"
 )
 
-type Node struct {
-	data int
-	next *Node
-}
+var arr_master []int = []int{}
 
-var headNode Node
-var iterationCounts int = 500000
+//var iterationCounts int = 500000
 
 var insertAvg []int64
 var insertAvgTotal int64 = 0
@@ -34,11 +30,8 @@ var deleteAvg []int64
 var deleteHighest int64
 var deleteLowest int64
 
-func TestSinglyLinkedList() {
-	//for i := 1; i < 500000; i++ {
-
-	//Temporary for development
-	for i := 1; i < iterationCounts; i++ {
+func TestArray(dataSize int) {
+	for i := 1; i < dataSize; i++ {
 		var insertTime = time.Now().UnixNano()
 		insertData(i)
 		var insertTimeEnd = time.Now().UnixNano()
@@ -57,7 +50,7 @@ func TestSinglyLinkedList() {
 		}
 	}
 
-	for i := 1; i < iterationCounts; i++ {
+	for i := 1; i < dataSize; i++ {
 		var accessTime = time.Now().UnixNano()
 		accessData()
 		var accessTimeEnd = time.Now().UnixNano()
@@ -76,9 +69,28 @@ func TestSinglyLinkedList() {
 		}
 	}
 
-	for i := 1; i < iterationCounts; i++ {
+	for i := 1; i < dataSize; i++ {
+		var accessTime = time.Now().UnixNano()
+		accessData()
+		var accessTimeEnd = time.Now().UnixNano()
+
+		accessAvg = append(accessAvg, (accessTimeEnd - accessTime))
+		accessAvgTotal = accessAvgTotal + int64((accessTimeEnd - accessTime))
+
+		if (accessTimeEnd - accessTime) > accessHighest {
+			accessHighest = (accessTimeEnd - accessTime)
+			continue
+		}
+
+		if (accessTimeEnd - accessTime) < accessLowest {
+			accessLowest = (accessTimeEnd - accessTime)
+			continue
+		}
+	}
+
+	for i := 1; i < dataSize; i++ {
 		var searchingTime = time.Now().UnixNano()
-		searchData(rand.Intn(iterationCounts-0) + 0)
+		searchData(rand.Intn(dataSize-0) + 0)
 		var searchingTimeEnd = time.Now().UnixNano()
 
 		searchingAvg = append(searchingAvg, (searchingTimeEnd - searchingTime))
@@ -95,18 +107,7 @@ func TestSinglyLinkedList() {
 		}
 	}
 
-	/*var searchingTime = time.Now().UnixNano()
-	deleteTarget, delErr := searchData(rand.Intn(9999-0) + 0)
-	var searchingTimeEnd = time.Now().UnixNano()
-	if delErr != nil {
-		log.Fatalln(delErr)
-	}*/
-
-	/*var deleteTime = time.Now().UnixNano()
-	deleteData(deleteTarget)
-	var deleteTimeEnd = time.Now().UnixNano()*/
-
-	fmt.Println("|=========== Completed Linked List ===========|")
+	fmt.Println("|=========== Completed Array ===========|")
 	fmt.Printf("	Insert: \n")
 	fmt.Printf("		- Avg: %d \n", (insertAvgTotal / int64(len(insertAvg))))
 	fmt.Printf("		- Low: %d \n", insertLowest)
@@ -128,59 +129,27 @@ func TestSinglyLinkedList() {
 }
 
 func accessData() {
-	var cursor = &headNode
-	for {
-		if cursor.next == nil {
-			return
-		}
-
-		cursor = cursor.next
+	for range arr_master {
+		continue
 	}
+
+	return
 }
 
-func searchData(value int) (*Node, error) {
-	var cursor = &headNode
-	for {
-		if cursor.next == nil {
-			return nil, errors.New("dataNotFound")
+func searchData(value int) (int, error) {
+	for i := range arr_master {
+		if value == i {
+			return i, nil
 		}
-
-		if cursor.data == value {
-			return cursor, nil
-		}
-
-		cursor = cursor.next
 	}
+
+	return 0, errors.New("dataNotFound")
 }
 
 func insertData(value int) {
-	var newData = Node{data: value, next: nil}
-
-	var cursor = &headNode
-	for {
-		if cursor.next == nil {
-			cursor.next = &newData
-			return
-		}
-
-		cursor = cursor.next
-	}
+	arr_master = append(arr_master, value)
 }
 
-func deleteData(value *Node) error {
-	var cursor = &headNode
-	for {
-		if cursor.next == nil {
-			return errors.New("dataNotFound")
-		}
-
-		if cursor.next == value {
-			cursor.next = cursor.next.next
-			return nil
-		}
-
-		cursor = cursor.next
-	}
+func deleteData(value int) error {
+	return nil
 }
-
-//TODO sorting
